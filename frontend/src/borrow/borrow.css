@@ -1,0 +1,33 @@
+html {
+  font-size: 100%;
+  box-sizing: border-box;
+}
+
+*,
+*::after,
+*::before {
+  box-sizing: border-box;
+  padding: 0px;
+  margin: 0px;
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  line-height: 1.3rem;
+  font-size: 1rem;
+}
+
+.box {
+  display: flex;
+  flex-direction: row;
+}
+
+.left {
+  box-shadow: 0px 0px 9px 0px rgba(76, 78, 97, 0.9);
+  width: 240px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  padding-left: 20px;
+}

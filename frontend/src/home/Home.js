@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link, withRouter } from "react-router-dom";
 import Button from "@mui/material/Button";
 import "./home.css";
@@ -14,6 +14,49 @@ const Home = ({ history }) => {
     } else {
       return { color: "#000000" };
     }
+  };
+
+  const [values, setValues] = useState({
+    deposit: "",
+    withdraw: "",
+  });
+
+  const [totalYield, setTotalYield] = useState();
+
+  const [walletBalance, setWalletBalance] = useState(2000);
+
+  const { deposit, withdraw } = values;
+
+  useEffect(() => {
+    getTotalYield()
+      .then((res) => {
+        setTotalYield(res);
+      })
+      .catch((err) => {});
+  }, []);
+
+  const handleChange = (name) => (event) => {
+    setValues({ ...values, [name]: event.target.value });
+  };
+
+  const onSubmitStake = (event) => {
+    event.preventDefault();
+    setValues({ ...values });
+    stake({ deposit })
+      .then(() => {})
+      .catch(() => {
+        console.log("Can't deposit");
+      });
+  };
+
+  const onSubmitUnstake = (event) => {
+    event.preventDefault();
+    setValues({ ...values });
+    unstake({ withdraw })
+      .then(() => {})
+      .catch(() => {
+        console.log("Can't withdraw");
+      });
   };
 
   return (
@@ -46,41 +89,49 @@ const Home = ({ history }) => {
             <div className="deposit wrapper">
               <p>Deposit</p>
               <hr />
-              <p>Wallet:</p>
+              <p>Wallet:{walletBalance}</p>
               <div className="data">
                 <p>ETH</p>
                 <Button variant="text">Max</Button>
               </div>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  console.log("Deposited");
-                }}
-              >
+              <div className="form-group">
+                <input
+                  className="form-control my-3 py-2"
+                  onChange={handleChange("deposit")}
+                  type="number"
+                  placeholder="Amount"
+                  value={deposit}
+                />
+              </div>
+              <Button variant="contained" onClick={onSubmitStake}>
                 Deposit
               </Button>
             </div>
             <div className="withdraw wrapper">
               <p>Withdraw</p>
               <hr />
-              <p>Balance:</p>
+              <p>Balance:{totalYield}</p>
               <div className="data">
                 <p>ETH</p>
                 <Button variant="text">Max</Button>
               </div>
-              <Button
-                variant="contained"
-                onClick={() => {
-                  console.log("Withdrawn");
-                }}
-              >
+              <div className="form-group">
+                <input
+                  className="form-control my-3 py-2"
+                  onChange={handleChange("withdraw")}
+                  type="number"
+                  placeholder="Amount"
+                  value={withdraw}
+                />
+              </div>
+              <Button variant="contained" onClick={onSubmitUnstake}>
                 Withdraw
               </Button>
             </div>
             <div className="total wrapper">
               <p>Total Deposit</p>
               <hr />
-              <p>Balance:</p>
+              <p>Balance:{totalYield}</p>
             </div>
           </section>
           <section className="bottom">
@@ -108,47 +159,63 @@ const Home = ({ history }) => {
 
 async function stake(amount) {
   // TODO: first validate the amount
-  if (typeof window.ethereum !== 'undefined') {
+  if (typeof window.ethereum !== "undefined") {
     await requestAccount();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     console.log({ provider });
     const signer = provider.getSigner();
-    const contract = new ethers.Contract(dygnifyStakingAddress, dygnifyStaking.abi, signer)
-    const transaction = await contract.stake(amount)
-    await transaction.wait()
-    fetchGreeting()
+    const contract = new ethers.Contract(
+      dygnifyStakingAddress,
+      dygnifyStaking.abi,
+      signer
+    );
+    const transaction = await contract.stake(amount);
+    await transaction.wait();
+    fetchGreeting();
   }
 }
 
 async function unstake(amount) {
   // TODO: first validate the amount
-  if (typeof window.ethereum !== 'undefined') {
+  if (typeof window.ethereum !== "undefined") {
     await requestAccount();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     console.log({ provider });
-    const contract = new ethers.Contract(dygnifyStakingAddress, dygnifyStaking.abi, provider);
+    const contract = new ethers.Contract(
+      dygnifyStakingAddress,
+      dygnifyStaking.abi,
+      provider
+    );
     const transaction = await contract.unstake(amount);
     await transaction.wait();
   }
 }
 
 async function getTotalYield() {
-  if (typeof window.ethereum !== 'undefined') {
-    await requestAccount()
+  if (typeof window.ethereum !== "undefined") {
+    await requestAccount();
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     console.log({ provider });
-    const contract = new ethers.Contract(dygnifyStakingAddress, dygnifyStaking.abi, provider);
+    const contract = new ethers.Contract(
+      dygnifyStakingAddress,
+      dygnifyStaking.abi,
+      provider
+    );
     try {
       const data = await contract.getTotalYield();
-      console.log('data: ', data);
+      console.log("data: ", data);
     } catch (err) {
       console.log("Error: ", err);
     }
   }
+
+  //adding return for random data "By Sudhanshu"
+  //Need to be deleted before set in production
+  return 5000;
 }
 
 async function requestAccount() {
-  await window.ethereum.request({ method: 'eth_requestAccounts' });
+  await window.ethereum.request({ method: "eth_requestAccounts" });
 }
 
 export default withRouter(Home);
